@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -121,13 +122,15 @@ public class Controller {
         System.out.println(path);
 
         // model: Add image to the current user
-        currentUser.addInstaImage(new InstaImage(path, new Date(), ""));
+        InstaImage img = new InstaImage(path, new Date(), "");
+        currentUser.addInstaImage(img);
 
         Label label = new Label(filename);
         vbox.setPrefHeight(vbox.getPrefHeight() + label.getPrefHeight());
         vbox.getChildren().add(label);
         Image imageA = new Image(path);
-        ImageView imageViewA = new ImageView(imageA);
+        //ImageView imageViewA = new ImageView(imageA);
+        MyImageView imageViewA = new MyImageView(imageA, img);
         imageViewA.setFitHeight(155);
         imageViewA.setFitWidth(125);
         // New stuff
@@ -152,7 +155,7 @@ public class Controller {
                         infoLbl.setMinHeight(30);
                         infoLbl.setMinWidth(80);
                         gridpane.add(infoLbl, 0, 1);
-                        TextArea textAreaFld = new TextArea("Text before editing.");
+                        TextArea textAreaFld = new TextArea(img.getAboutImage());
                         textAreaFld.setEditable(true);
                         textAreaFld.setWrapText(true);
                         gridpane.add(textAreaFld, 1, 1);
@@ -162,6 +165,7 @@ public class Controller {
                             public void handle(ActionEvent event) {
                                 System.out.println("Add Info Button");
                                 String s = textAreaFld.getText();
+                                img.setAboutImage(s);
                                 System.out.println(s);
                                 dialog.close();
                             }
@@ -188,7 +192,7 @@ public class Controller {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(primaryStage);
         VBox dialogVbox = new VBox(20);
-        dialogVbox.getChildren().add(new Text("This is a Dialog"));
+        dialogVbox.getChildren().add(new Text("Login Dialog"));
         Scene dialogScene = new Scene(dialogVbox, 300, 200);
         // New code
         GridPane gridpane = new GridPane();
@@ -219,6 +223,7 @@ public class Controller {
                 currentUser = Main.udb.verifyUser(userName, passWord);
                 if (currentUser != null) {
                     System.out.println("Good User");
+                    System.out.println(currentUser.toString());
                     postInfo.setDisable(false);
                     feedMenuItem.setDisable(false);
                     mystuffMenuItem.setDisable(false);
@@ -230,87 +235,23 @@ public class Controller {
                     // Add users and who is being followed
                     followMenu.getItems().clear();
                     // model: Get the users from the DB and display them in the follow menu
+                    // Check those that are being followed
+                    String[] follows = currentUser.getFollows();
                     String[] users = Main.udb.getUsers();
                     final RadioMenuItem[] items = new RadioMenuItem[users.length];
                     followItems = new ArrayList<RadioMenuItem>();
                     for (int i = 0; i < users.length; i++) {
                         items[i] = new RadioMenuItem(users[i]);
                         followItems.add(items[i]);
-                        /*
-                        items[i].setOnAction(new EventHandler<ActionEvent>() {
-                            @Override
-                            public void handle(ActionEvent event) {
-                                System.out.println("AAAA");
-                            }
-                        });
-                        */
                         followMenu.getItems().addAll(items[i]);
+                        for (String s : follows)
+                            if (s.equals(users[i]))
+                                items[i].setSelected(true);
                     }
 
-                    // model: Add current user's photos to the feed
+                    // model: Display current user's images to the feed
                     InstaImage[] imgs = currentUser.getInstaImages();
-                    String[] fileUrls = new String[imgs.length];
-                    String[] aboutImages = new String[imgs.length];
-                    for (int i = 0; i < imgs.length; i++) {
-                        fileUrls[i] = imgs[i].getFileUrl();
-                        aboutImages[i] = imgs[i].getAboutImage();
-                        // Todo - figure how to put aboutImages into the popup text box
-                    }
-                    for (String f : fileUrls) {
-                        System.out.println(f);
-                        Label label = new Label(f);
-                        vbox.setPrefHeight(vbox.getPrefHeight() + label.getPrefHeight());
-                        vbox.getChildren().add(label);
-                        Image imageA = new Image(f);
-                        ImageView imageViewA = new ImageView(imageA);
-                        imageViewA.setFitHeight(155);
-                        imageViewA.setFitWidth(125);
-                        imageViewA.setOnMouseClicked(
-                            new EventHandler<MouseEvent>() {
-                                @Override
-                                public void handle(MouseEvent mouseEvent) {
-                                    if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
-                                        Stage primaryStage = (Stage) label.getScene().getWindow();
-                                        final Stage dialog = new Stage();
-                                        dialog.initModality(Modality.APPLICATION_MODAL);
-                                        dialog.initOwner(primaryStage);
-                                        VBox dialogVbox = new VBox(20);
-                                        Scene dialogScene = new Scene(dialogVbox, 300, 200);
-
-                                        GridPane gridpane = new GridPane();
-                                        gridpane.setPadding(new Insets(5));
-                                        gridpane.setHgap(5);
-                                        gridpane.setVgap(5);
-
-                                        Label infoLbl = new Label("Image Info: ");
-                                        infoLbl.setMinHeight(30);
-                                        infoLbl.setMinWidth(80);
-                                        gridpane.add(infoLbl, 0, 1);
-                                        TextArea textAreaFld = new TextArea("Text before editing.");
-                                        textAreaFld.setEditable(true);
-                                        textAreaFld.setWrapText(true);
-                                        gridpane.add(textAreaFld, 1, 1);
-
-                                        Button addInfo = new Button("Add Info");
-                                        addInfo.setOnAction(new EventHandler<ActionEvent>() {
-                                            public void handle(ActionEvent event) {
-                                                System.out.println("Add Info Button");
-                                                String s = textAreaFld.getText();
-                                                System.out.println(s);
-                                                dialog.close();
-                                            }
-                                        });
-                                        gridpane.add(addInfo, 1, 3);
-                                        GridPane.setHalignment(addInfo, HPos.RIGHT);
-                                        dialogVbox.getChildren().add(gridpane);
-                                        dialog.setScene(dialogScene);
-                                        dialog.show();
-                                    }
-                                }
-                            });
-                        vbox.getChildren().add(imageViewA);
-                        mainScrollPane.setContent(vbox);
-                    }
+                    displayImages(imgs);
                 }
                 else
                     System.out.println("Bad User");
@@ -428,11 +369,25 @@ public class Controller {
 
     }
 
+    String currentFeedSelection = "none";
+
     @FXML
     void handleFeed(ActionEvent event) {
         System.out.println("handleFeed");
         mystuffMenuItem.setSelected(false);
         customCheckBox.setSelected(false);
+        if (feedMenuItem.isSelected()) {
+            System.out.println("MenuItem: " + feedMenuItem.getText() + (feedMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
+            // model: Display current user's images to the feed
+            InstaImage[] imgs = currentUser.getFeedImages();
+            displayImages(imgs);
+        }
+        else {
+            System.out.println("MenuItem: " + feedMenuItem.getText() + (feedMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
+            feedMenuItem.setSelected(true);
+        }
+        for (String s : currentUser.getFollows())
+            System.out.println(s);
     }
 
     @FXML
@@ -440,18 +395,17 @@ public class Controller {
         System.out.println("handleMyStuff");
         feedMenuItem.setSelected(false);
         customCheckBox.setSelected(false);
+        if (mystuffMenuItem.isSelected()) {
+            System.out.println("MenuItem: " + mystuffMenuItem.getText() + (mystuffMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
+        }
+        else {
+            System.out.println("MenuItem: " + mystuffMenuItem.getText() + (mystuffMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
+            mystuffMenuItem.setSelected(true);
+        }
     }
 
-    @FXML
-    void handleSearchHashTag(ActionEvent event) {
-        System.out.println("handleSearchHashTag");
-        feedMenuItem.setSelected(false);
-        mystuffMenuItem.setSelected(false);
-        String text = customTextField.getText();
-        System.out.println(text);
-        customCheckBox.setSelected(true);
-        // model: Add current user's photos to the feed
-        InstaImage[] imgs = Main.udb.getHashInstaImages(text);
+    private void displayImages(InstaImage[] imgs) {
+        System.out.println(Arrays.toString(imgs));
         String[] fileUrls = new String[imgs.length];
         String[] aboutImages = new String[imgs.length];
         for (int i = 0; i < imgs.length; i++) {
@@ -459,13 +413,15 @@ public class Controller {
             aboutImages[i] = imgs[i].getAboutImage();
             // Todo - figure how to put aboutImages into the popup text box
         }
-        for (String f : fileUrls) {
-            System.out.println(f);
-            Label label = new Label(f);
+        for (InstaImage img : imgs) {
+        //for (String f : fileUrls) {
+            System.out.println(img.getFileUrl());
+            Label label = new Label(img.getFileUrl());
             vbox.setPrefHeight(vbox.getPrefHeight() + label.getPrefHeight());
             vbox.getChildren().add(label);
-            Image imageA = new Image(f);
-            ImageView imageViewA = new ImageView(imageA);
+            Image imageA = new Image(img.getFileUrl());
+            //ImageView imageViewA = new ImageView(imageA);
+            MyImageView imageViewA = new MyImageView(imageA, img);
             imageViewA.setFitHeight(155);
             imageViewA.setFitWidth(125);
             imageViewA.setOnMouseClicked(
@@ -473,6 +429,10 @@ public class Controller {
                     @Override
                     public void handle(MouseEvent mouseEvent) {
                         if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                            System.out.println(imageViewA.getImg().getFileUrl());
+                            System.out.println("MOUSEEVENT: " + mouseEvent.toString());
+                            System.out.println("SOURCE: " + mouseEvent.getSource().toString());
+                            System.out.println("SORCE HASHCODE: " + mouseEvent.getSource().hashCode());
                             Stage primaryStage = (Stage) label.getScene().getWindow();
                             final Stage dialog = new Stage();
                             dialog.initModality(Modality.APPLICATION_MODAL);
@@ -489,7 +449,7 @@ public class Controller {
                             infoLbl.setMinHeight(30);
                             infoLbl.setMinWidth(80);
                             gridpane.add(infoLbl, 0, 1);
-                            TextArea textAreaFld = new TextArea("Text before editing.");
+                            TextArea textAreaFld = new TextArea(imageViewA.getImg().getAboutImage());
                             textAreaFld.setEditable(true);
                             textAreaFld.setWrapText(true);
                             gridpane.add(textAreaFld, 1, 1);
@@ -500,6 +460,7 @@ public class Controller {
                                     System.out.println("Add Info Button");
                                     String s = textAreaFld.getText();
                                     System.out.println(s);
+                                    imageViewA.getImg().setAboutImage(s);
                                     dialog.close();
                                 }
                             });
@@ -517,16 +478,36 @@ public class Controller {
     }
 
     @FXML
+    void handleSearchHashTag(ActionEvent event) {
+        System.out.println("handleSearchHashTag");
+        feedMenuItem.setSelected(false);
+        mystuffMenuItem.setSelected(false);
+        String text = customTextField.getText();
+        System.out.println(text);
+        if (customCheckBox.isSelected()) {
+            System.out.println("MenuItem: " + customCheckBox.getText() + (customCheckBox.selectedProperty().getValue() ? " checked" : " unchecked"));
+            // model: Display images that match the hashtag
+            InstaImage[] imgs = Main.udb.getHashInstaImages(text);
+            displayImages(imgs);
+        }
+        else {
+            System.out.println("MenuItem: " + customCheckBox.getText() + (customCheckBox.selectedProperty().getValue() ? " checked" : " unchecked"));
+            customCheckBox.setSelected(true);
+        }
+        //customCheckBox.setSelected(true);
+    }
+
+    @FXML
     void handleFollowMenu(ActionEvent event) {
         System.out.println("Handle Follow Menu.");
-        ObservableList<MenuItem> items = followMenu.getItems();
-        for (MenuItem m : items) {
-            System.out.println(m.getText());
-        }
         for (RadioMenuItem rm : followItems) {
             if (rm.isSelected()) {
-                System.out.println("Hey There " + rm.getText());
-                rm.setSelected(true);
+                System.out.println("MenuItem: " + rm.getText() + (rm.selectedProperty().getValue() ? " checked" : " unchecked"));
+                Main.udb.follow(currentUser, rm.getText());
+            }
+            else {
+                System.out.println("MenuItem: " + rm.getText() + (rm.selectedProperty().getValue() ? " checked" : " unchecked"));
+                Main.udb.unFollow(currentUser, rm.getText());
             }
         }
     }

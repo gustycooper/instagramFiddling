@@ -83,6 +83,40 @@ public class UserDB implements Serializable {
         return retArray;
     }
 
+    public User[] getUserObjects() {
+        User[] retArray =  new User[users.size()];
+        for (int i = 0; i < users.size(); i++)
+            retArray[i] =  users.get(i);
+        return retArray;
+    }
+
+    private User findUser(String userName) {
+        for (User u : users)
+            if (u.getUserName().equals(userName))
+                return u;
+        return null;
+    }
+
+    /**
+     * Establish User u to follow the User for userName
+     * @param u
+     * @param userName
+     */
+    public void follow(User u, String userName) {
+        User follower = findUser(userName);
+        System.out.println("In UserDB.follow");
+        if (follower != null && follower != u) {
+            System.out.println("UserDB.follow calls u.follow");
+            u.follow(follower);
+        }
+    }
+
+    public void unFollow(User u, String userName) {
+        User follower = findUser(userName);
+        if (follower != null)
+            u.unFollow(follower);
+    }
+
     public boolean registerUser(String userName, String passWord, String email, String aboutMe) {
         users.add(new User(userName, passWord, email, aboutMe));
         return true;

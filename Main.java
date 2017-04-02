@@ -31,7 +31,7 @@ public class Main extends Application {
         ObjectOutputStream oos = null;
         FileOutputStream fout = null;
         try{
-            fout = new FileOutputStream("instaFiddleDB.ser", true);
+            fout = new FileOutputStream("instaFiddleDB.ser", false);
             oos = new ObjectOutputStream(fout);
             oos.writeObject(udb);
             System.out.println("instatFiddleDB.ser written");
@@ -47,6 +47,7 @@ public class Main extends Application {
 
     public static UserDB udb;
     private static boolean haveDBFile = true;
+    private static boolean clearFollows = false;
 
     public static void main(String[] args) throws IOException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -62,6 +63,10 @@ public class Main extends Application {
                 streamIn = new FileInputStream("instaFiddleDB.ser");
                 objectinputstream = new ObjectInputStream(streamIn);
                 udb = (UserDB) objectinputstream.readObject();
+
+                if (clearFollows)
+                    for (User u : udb.getUserObjects())
+                        u.clearFollows();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
