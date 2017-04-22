@@ -23,13 +23,14 @@
       <ColumnConstraints />
    </columnConstraints>
    <rowConstraints>
-      <RowConstraints />
+      <RowConstraints maxHeight="20.0" minHeight="14.0" prefHeight="19.0" />
+      <RowConstraints maxHeight="26.0" minHeight="20.0" prefHeight="21.0" />
       <RowConstraints />
       <RowConstraints />
       <RowConstraints />
    </rowConstraints>
    <children>
-      <ScrollPane fx:id="mainScrollPane" prefHeight="417.0" prefWidth="327.0" GridPane.rowIndex="2">
+      <ScrollPane fx:id="mainScrollPane" prefHeight="417.0" prefWidth="327.0" GridPane.rowIndex="3">
          <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="421.0" prefWidth="339.0">
                <children>
@@ -47,7 +48,7 @@
             </AnchorPane>
          </content>
       </ScrollPane>
-      <MenuBar GridPane.rowIndex="1">
+      <MenuBar GridPane.rowIndex="2">
         <menus>
           <Menu mnemonicParsing="false" text="Account">
             <items>
@@ -89,10 +90,14 @@
           </Menu>
         </menus>
       </MenuBar>
-      <Label fx:id="whoAmI" alignment="CENTER" contentDisplay="CENTER" text="Guest" textAlignment="CENTER">
+      <Label fx:id="whoAmI" alignment="CENTER" contentDisplay="CENTER" text="Guest" textAlignment="CENTER" GridPane.rowIndex="1">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
+      <Label fx:id="displayTime" alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="17.0" prefWidth="327.0" text="00:00:00" textFill="#8f1c0b">
+         <font>
+            <Font name="Lucida Sans Typewriter Regular" size="13.0" />
+         </font></Label>
    </children>
 </GridPane>

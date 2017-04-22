@@ -6,7 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by gusty on 3/23/17.
+ * Create class to define users of instagramFiddling
+ * A user several typical fields such as userName, passWord, email, etc.
+ * A user has a list of InstaImage, which are the images they post
+ * A user has a list of User, which are the users that they follow
+ * The various getters and setters are fairly obvious
+ * There is some funky looking code for follows that resulted because I added follows after initially writing
+ * the serialized object db file.  This resulted in users have List<User> follows as null.  It took a while to
+ * figure this out, and I put some funky code in while figuring out the problem.
  */
 
 public class User implements Serializable {
@@ -109,7 +116,8 @@ public class User implements Serializable {
     }
 
     public String toString() {
-        return userName + " " + passWord + email + aboutMe + follows + instaImages;
+        //return userName + " " + passWord + email + aboutMe + follows + instaImages;
+        return userName;
     }
 
 }

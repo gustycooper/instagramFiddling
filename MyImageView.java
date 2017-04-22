@@ -4,7 +4,15 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
- * Created by gusty on 3/28/17.
+ * MyImageView is used to connect InstaImage to an ImageView in the vbox.
+ * See code in Controller.displayImages() for how this works.
+ * Each image is a clickable item.
+ * When clicked a dialog box with comments about the image is displayed.
+ * The user can add text to the dialog box and select ok.
+ * The added text is placed in the InstaImage
+ * The mouse event handler can access the InstaImage text via the following.
+ *     imageViewA.getImg().setAboutImage(s);
+ * Where imageViewA is a MyImageView object
  */
 public class MyImageView extends ImageView {
 

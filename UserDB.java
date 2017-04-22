@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by gusty on 3/23/17.
+ * UserDB implements the database of users for instagramFiddling
+ * The method initializeUserDB is used to bootstrap the DB.  See Main.haveDBfile for how this is done
  */
 public class UserDB implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -60,10 +61,17 @@ public class UserDB implements Serializable {
         }
     }
 
+    /**
+     * Verifies user and passWord are in the DB
+     * @param user
+     * @param passWord
+     * @return User or null
+     */
     public User verifyUser(String user, String passWord) {
-        System.out.println("HELLO\n.");
+        System.out.println("Verifying User:" + user + " " + passWord);
         for (User u : users) {
-            System.out.println("HERE" + u);
+            System.out.println("User: " + u.getUserName() + " " + u.getPassWord());
+
             if (u.getUserName().equals(user) && u.getPassWord().equals(passWord)) {
                 currentUser = u;
                 return u;
@@ -76,6 +84,10 @@ public class UserDB implements Serializable {
 
     public void setCurrentUser(String currentUserName) { this.currentUserName = currentUserName; }
 
+    /**
+     * Create a String[] of current users
+     * @return
+     */
     public String[] getUsers() {
         String[] retArray = new String[users.size()];
         for (int i = 0; i < users.size(); i++)
@@ -83,6 +95,10 @@ public class UserDB implements Serializable {
         return retArray;
     }
 
+    /**
+     * Create User[] of current users
+     * @return
+     */
     public User[] getUserObjects() {
         User[] retArray =  new User[users.size()];
         for (int i = 0; i < users.size(); i++)
@@ -90,6 +106,11 @@ public class UserDB implements Serializable {
         return retArray;
     }
 
+    /**
+     * See if userName is in DB
+     * @param userName String of user name
+     * @return User or null
+     */
     private User findUser(String userName) {
         for (User u : users)
             if (u.getUserName().equals(userName))
@@ -117,6 +138,14 @@ public class UserDB implements Serializable {
             u.unFollow(follower);
     }
 
+    /**
+     * Place a new user in the DB.  Assumes all parameters have good data.
+     * @param userName
+     * @param passWord
+     * @param email
+     * @param aboutMe
+     * @return
+     */
     public boolean registerUser(String userName, String passWord, String email, String aboutMe) {
         users.add(new User(userName, passWord, email, aboutMe));
         return true;
@@ -131,6 +160,11 @@ public class UserDB implements Serializable {
         return imgs[r2];
     }
 
+    /**
+     * Search all images for the hashValue
+     * @param hashValue This is really a string that may contain a # char - like #hello.  # is not important
+     * @return array of InstaImage, where each InstaImage has the string in its aboutImage field
+     */
     public InstaImage[] getHashInstaImages(String hashValue) {
         List<InstaImage> l = new ArrayList<>();
         for (User u : users)

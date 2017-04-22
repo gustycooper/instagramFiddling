@@ -21,17 +21,25 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Contains code to handle the GUI events
+ */
 public class Controller {
-
 
     private User currentUser = null; // User that is currently logged in
 
-    // variables and method used to flop the first picture in the feed
+    /*
+     * variables and method used to flop the first picture in the feed
+     * If the variable Main.clearView is true, the first picture (and others) are cleared from view each time the
+     * view changes, i.e., new login or view menue selected
+     */
     private int flipFlop = 0;
     private Image gustyGiraffe = new Image("file:/Users/gusty/Google%20Drive/00UMW/11CPSC240/Karen/code/instagramFiddling/img/GustyGiraffe.jpg");
     private Image zacNavy = new Image("file:/Users/gusty/Google%20Drive/00UMW/11CPSC240/Karen/code/instagramFiddling/img/zacNavy.jpg");
@@ -55,20 +63,33 @@ public class Controller {
         }
     }
 
+    /**
+     * The various FXML variables origniate from SceneBuildier
+     */
     @FXML
-    private Label label1;
+    private Label label1;  // label on the first image
 
     @FXML
-    private ImageView image1;
+    private ImageView image1; // first image
 
     @FXML
     private ScrollPane mainScrollPane;
 
     @FXML
-    private VBox vbox;
+    private VBox vbox; // vbox in the mainScrollPane
 
     @FXML
-    private Label whoAmI;
+    private Label whoAmI; // label that displays name of current user (or Guest)
+
+    /**
+     * displayTime is used to display time of day
+     * displayTime has a setter and getter (setter not used)
+     */
+    @FXML
+    private Label displayTime;
+
+    public String getDisplayTime() { return displayTime.getText(); }
+    public void setDisplayTime(String s) { displayTime.setText(s); }
 
     @FXML
     private Menu postInfo;
@@ -112,17 +133,19 @@ public class Controller {
     // Method that handles the Post Info > Choose menu item
     @FXML
     void handleChooseFile(ActionEvent event) {
-        System.out.println("Choose File Selected");
+        System.out.println("Handle Choose File Selected");
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(mainScrollPane.getScene().getWindow());
         String filename = selectedFile.getName();
         String path = selectedFile.getAbsolutePath();
         path = "file:" + path;
-        System.out.println(filename);
-        System.out.println(path);
+        System.out.println("Filename: " + filename);
+        System.out.println("Filepath: " + path);
 
         // model: Add image to the current user
-        InstaImage img = new InstaImage(path, new Date(), "");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date imageAddedDate = new Date();
+        InstaImage img = new InstaImage(path, imageAddedDate, "Date Image Added: " + dateFormat.format(imageAddedDate));
         currentUser.addInstaImage(img);
 
         Label label = new Label(filename);
@@ -163,10 +186,10 @@ public class Controller {
                         Button addInfo = new Button("Add Info");
                         addInfo.setOnAction(new EventHandler<ActionEvent>() {
                             public void handle(ActionEvent event) {
-                                System.out.println("Add Info Button");
+                                System.out.println("Handle Add Info Button");
                                 String s = textAreaFld.getText();
                                 img.setAboutImage(s);
-                                System.out.println(s);
+                                System.out.println("Add Info Text: " + s);
                                 dialog.close();
                             }
                         });
@@ -222,8 +245,7 @@ public class Controller {
                 // model: Verify the userName and passWord
                 currentUser = Main.udb.verifyUser(userName, passWord);
                 if (currentUser != null) {
-                    System.out.println("Good User");
-                    System.out.println(currentUser.toString());
+                    System.out.println("Good User: " + currentUser.getUserName() + " " + currentUser.getPassWord());
                     postInfo.setDisable(false);
                     feedMenuItem.setDisable(false);
                     mystuffMenuItem.setDisable(false);
@@ -236,7 +258,7 @@ public class Controller {
                     followMenu.getItems().clear();
                     // model: Get the users from the DB and display them in the follow menu
                     // Check those that are being followed
-                    String[] follows = currentUser.getFollows();
+                    String[] follows = currentUser.getFollows(); // null indicates does not follow anyone
                     String[] users = Main.udb.getUsers();
                     final RadioMenuItem[] items = new RadioMenuItem[users.length];
                     followItems = new ArrayList<RadioMenuItem>();
@@ -244,14 +266,15 @@ public class Controller {
                         items[i] = new RadioMenuItem(users[i]);
                         followItems.add(items[i]);
                         followMenu.getItems().addAll(items[i]);
-                        for (String s : follows)
-                            if (s.equals(users[i]))
-                                items[i].setSelected(true);
+                        if (follows != null)  // make sure the user follows someone
+                            for (String s : follows)
+                                if (s.equals(users[i]))
+                                    items[i].setSelected(true);
                     }
 
                     // model: Display current user's images to the feed
                     InstaImage[] imgs = currentUser.getInstaImages();
-                    displayImages(imgs);
+                    displayImages(imgs, "My Stuff");
                 }
                 else
                     System.out.println("Bad User");
@@ -290,7 +313,7 @@ public class Controller {
     // Method that processes account registrations, Account > Register
     @FXML
     void handleRegister(ActionEvent event) {
-        System.out.println("handle register.");
+        System.out.println("Handle Register.");
         Stage primaryStage = (Stage) whoAmI.getScene().getWindow();
         final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -373,30 +396,37 @@ public class Controller {
 
     @FXML
     void handleFeed(ActionEvent event) {
-        System.out.println("handleFeed");
+        System.out.println("Handle Feed");
         mystuffMenuItem.setSelected(false);
         customCheckBox.setSelected(false);
         if (feedMenuItem.isSelected()) {
             System.out.println("MenuItem: " + feedMenuItem.getText() + (feedMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
             // model: Display current user's images to the feed
             InstaImage[] imgs = currentUser.getFeedImages();
-            displayImages(imgs);
+            displayImages(imgs, "My Feed");
         }
         else {
             System.out.println("MenuItem: " + feedMenuItem.getText() + (feedMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
             feedMenuItem.setSelected(true);
         }
-        for (String s : currentUser.getFollows())
-            System.out.println(s);
+        System.out.println(currentUser.getUserName() + " follows:");
+        String[] ss = currentUser.getFollows();
+        if (ss != null)
+            for (String s : ss)
+                System.out.println(s);
+        else
+            System.out.println("No one");
     }
 
     @FXML
     void handleMyStuff(ActionEvent event) {
-        System.out.println("handleMyStuff");
+        System.out.println("Handle MyStuff");
         feedMenuItem.setSelected(false);
         customCheckBox.setSelected(false);
         if (mystuffMenuItem.isSelected()) {
             System.out.println("MenuItem: " + mystuffMenuItem.getText() + (mystuffMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
+            InstaImage[] imgs = currentUser.getInstaImages();
+            displayImages(imgs, "My Stuff");
         }
         else {
             System.out.println("MenuItem: " + mystuffMenuItem.getText() + (mystuffMenuItem.selectedProperty().getValue() ? " checked" : " unchecked"));
@@ -404,15 +434,35 @@ public class Controller {
         }
     }
 
-    private void displayImages(InstaImage[] imgs) {
-        System.out.println(Arrays.toString(imgs));
-        String[] fileUrls = new String[imgs.length];
-        String[] aboutImages = new String[imgs.length];
+    private void displayImages(InstaImage[] imgs, String type) {
+        System.out.println("displayImages() Information");
+        System.out.println("InstaImage[]: " + Arrays.toString(imgs));
+        String[] fileUrls = new String[imgs.length+1];
+        String[] aboutImages = new String[imgs.length+1];
+        fileUrls[0] = "file:/Users/gusty/Google%20Drive/00UMW/11CPSC240/Karen/code/instagramFiddling/img/changeView.png";
+        aboutImages[0] = "User: " + currentUser.getUserName() + " Image View: " + type;
         for (int i = 0; i < imgs.length; i++) {
-            fileUrls[i] = imgs[i].getFileUrl();
-            aboutImages[i] = imgs[i].getAboutImage();
+            fileUrls[i+1] = imgs[i].getFileUrl();
+            aboutImages[i+1] = imgs[i].getAboutImage();
             // Todo - figure how to put aboutImages into the popup text box
         }
+        if (Main.clearView) {
+            vbox.getChildren().clear();
+            /*
+             * Next line attempts to keep the flip-flopping first image
+             * The approach only works for the first login.
+             */
+            //vbox.getChildren().remove(1,vbox.getChildren().size()-1);
+        }
+        Label labelView = new Label(aboutImages[0]);
+        vbox.setPrefHeight(vbox.getPrefHeight() + labelView.getPrefHeight());
+        vbox.getChildren().add(labelView);
+        Image imageView = new Image(fileUrls[0]);
+        ImageView imageViewView = new ImageView(imageView);
+        imageViewView.setFitHeight(200);
+        imageViewView.setFitWidth(275);
+        vbox.getChildren().add(imageViewView);
+        mainScrollPane.setContent(vbox);
         for (InstaImage img : imgs) {
         //for (String f : fileUrls) {
             System.out.println(img.getFileUrl());
@@ -430,9 +480,9 @@ public class Controller {
                     public void handle(MouseEvent mouseEvent) {
                         if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
                             System.out.println(imageViewA.getImg().getFileUrl());
-                            System.out.println("MOUSEEVENT: " + mouseEvent.toString());
-                            System.out.println("SOURCE: " + mouseEvent.getSource().toString());
-                            System.out.println("SORCE HASHCODE: " + mouseEvent.getSource().hashCode());
+                            System.out.println("Image mouseEvent: " + mouseEvent.toString());
+                            System.out.println("Image mouseEvent source: " + mouseEvent.getSource().toString());
+                            System.out.println("Image mouseEvent sorce hashcode: " + mouseEvent.getSource().hashCode());
                             Stage primaryStage = (Stage) label.getScene().getWindow();
                             final Stage dialog = new Stage();
                             dialog.initModality(Modality.APPLICATION_MODAL);
@@ -457,9 +507,9 @@ public class Controller {
                             Button addInfo = new Button("Add Info");
                             addInfo.setOnAction(new EventHandler<ActionEvent>() {
                                 public void handle(ActionEvent event) {
-                                    System.out.println("Add Info Button");
+                                    System.out.println("Add Info Button Selected");
                                     String s = textAreaFld.getText();
-                                    System.out.println(s);
+                                    System.out.println("Text in Add Info: " + s);
                                     imageViewA.getImg().setAboutImage(s);
                                     dialog.close();
                                 }
@@ -479,16 +529,16 @@ public class Controller {
 
     @FXML
     void handleSearchHashTag(ActionEvent event) {
-        System.out.println("handleSearchHashTag");
+        System.out.println("Handle Search HashTag");
         feedMenuItem.setSelected(false);
         mystuffMenuItem.setSelected(false);
         String text = customTextField.getText();
-        System.out.println(text);
+        System.out.println("Text in Search Field: " + text);
         if (customCheckBox.isSelected()) {
             System.out.println("MenuItem: " + customCheckBox.getText() + (customCheckBox.selectedProperty().getValue() ? " checked" : " unchecked"));
             // model: Display images that match the hashtag
             InstaImage[] imgs = Main.udb.getHashInstaImages(text);
-            displayImages(imgs);
+            displayImages(imgs, "Search Results");
         }
         else {
             System.out.println("MenuItem: " + customCheckBox.getText() + (customCheckBox.selectedProperty().getValue() ? " checked" : " unchecked"));
@@ -514,7 +564,7 @@ public class Controller {
 
     @FXML
     void handleAbout(ActionEvent event) {
-        System.out.println("handle register.");
+        System.out.println("Handle Register.");
         Stage primaryStage = (Stage) whoAmI.getScene().getWindow();
         final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);

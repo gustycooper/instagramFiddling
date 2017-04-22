@@ -7,7 +7,9 @@ import java.util.Comparator;
 import java.util.Date;
 
 /**
- * Created by gusty on 3/26/17.
+ * InstaImage is a class for each image posted in instagramFiddling
+ * The comparator and contains are not used at this time.
+ * The date posted field was added late in development
  */
 public class InstaImage implements Serializable {
     private static final long serialVersionUID = 1L;
