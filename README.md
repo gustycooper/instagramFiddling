@@ -6,10 +6,10 @@ This project is a group-level project for CPSC 240 (Object-Oriented Programming)
 
 ## Motivation
 
-I to Dr. Anewalt's CPSC 240 in Spring 2017.  My goal was to prepare to teach CPSC 240 in Fall 2017.  I completed most of the assignments.
-Dr. Anewalt's final project was a Instagram-like project.
-Dr. Anewalt created teams of three to compelte the project.
-I completed the project, using JavaFX, Scene Builder, and general programming.
+* I took Dr. Anewalt's CPSC 240 in Spring 2017.  My goal was to prepare to teach CPSC 240 in Fall 2017.  I completed most of the assignments.
+* Dr. Anewalt's final project was a Instagram-like project.
+* Dr. Anewalt created teams of three to compelte the project.
+* I completed the project, using JavaFX, Scene Builder, and general programming.
 
 ## Installation
 
